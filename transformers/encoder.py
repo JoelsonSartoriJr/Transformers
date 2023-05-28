@@ -20,23 +20,26 @@ class Encoder(nn.Module):
         self.word_embedding = nn.Embedding(src_vocab_size, embed_size)
         self.position_embedding = nn.Embedding(max_length, embed_size)
         
-        self.layers = nn.ModuleList([
-            TransformerBlock(
-                embed_size,
-                heads,
-                dropout=dropout,
-                forward_expansion=forward_expansion
-            )
-            for _ in range(num_layers)
-        ])
+        self.layers = nn.ModuleList(
+            [
+                TransformerBlock(
+                    embed_size,
+                    heads,
+                    dropout=dropout,
+                    forward_expansion=forward_expansion
+                )
+                for _ in range(num_layers)
+            ]
+        )
         
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, x:list, mask)->list:
         N, seq_length = x.shape
         pos = torch.arange(0, seq_length).expand(N, seq_length).to(self.device)
-        
-        out = self.dropout(self.word_embedding(x) + self.position_embedding(pos))
+        out = self.dropout(
+            (self.word_embedding(x) + self.position_embedding(pos))
+        )
         
         for layer in self.layers:
             out = layer(out, out, out, mask)
