@@ -15,7 +15,7 @@ class SelfAttention(nn.Module):
         self.queries = nn.Linear(self.heads_dim, self.heads_dim, bias=False)
         self.fc_out = nn.Linear(heads*self.heads_dim, embed_size)
         
-    def forward(self, values:list, keys:list, queries:list, mask):
+    def forward(self, values:list, keys:list, queries:list, mask)->list:
         N = queries.shape[0]
         value_len, key_len, query_len = values.shape[1], keys.shape[1], queries.shape[1]
         
