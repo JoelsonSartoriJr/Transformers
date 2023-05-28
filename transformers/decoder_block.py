@@ -6,8 +6,8 @@ from transformer_block import TransformerBlock
 class DecoderBlock(nn.Module):
     def __init__(self, embed_size:int, heads:int, forward_expansion:int, dropout:float, device:torch.device) -> None:
         super(DecoderBlock, self).__init__()
-        self.attention = SelfAttention(embed_size, heads)
         self.norm = nn.LayerNorm(embed_size)
+        self.attention = SelfAttention(embed_size, heads=heads)
         self.transformer_block = TransformerBlock(embed_size, heads, dropout, forward_expansion)
         self.dropout = nn.Dropout(dropout)
         
