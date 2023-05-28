@@ -13,17 +13,21 @@ class SelfAttention(nn.Module):
         self.values = nn.Linear(self.heads_dim, self.heads_dim, bias=False)
         self.keys = nn.Linear(self.heads_dim, self.heads_dim, bias=False)
         self.queries = nn.Linear(self.heads_dim, self.heads_dim, bias=False)
-        self.fc_out = nn.Linear(heads*self.heads_dim, embed_size)
+        self.fc_out = nn.Linear(embed_size, embed_size)
         
     def forward(self, values:list, keys:list, queries:list, mask)->list:
         N = queries.shape[0]
         value_len, key_len, query_len = values.shape[1], keys.shape[1], queries.shape[1]
         
+        values = self.values(values)
+        keys = self.keys(keys)
+        queries = self.queries(queries)
+        
         values = values.reshape(N, value_len, self.heads, self.heads_dim)
         key_len = keys.reshape(N, key_len, self.heads, self.heads_dim)
         queries = queries.reshape(N, query_len, self.heads, self.heads_dim)
         
-        att = torch.einsum("nqhd, nkhd -> nhqk", [queries, keys])
+        attn = torch.einsum("nqhd, nkhd -> nhqk", [queries, keys])
         #queries shape: (N, query_len, heads, heads_dim)
         #keys shape: (N, key_len, heads, heads_dim)
         #att shape: (N, heads, query_len, key_len)
