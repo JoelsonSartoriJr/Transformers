@@ -19,10 +19,12 @@ class Decoder(nn.Module):
         self.word_embedding = nn.Embedding(trg_vocab_size, embed_size)
         self.position_embedding = nn.Embedding(max_length, embed_size)
         
-        self.layers = nn.ModuleList([
-            DecoderBlock(embed_size, heads, forward_expansion, dropout, device)
-            for _ in range(num_layers)
-        ])
+        self.layers = nn.ModuleList(
+            [
+                DecoderBlock(embed_size, heads, forward_expansion, dropout, device)
+                for _ in range(num_layers)
+            ]
+        )
         
         self.fc_out = nn.Linear(embed_size, trg_vocab_size)
         self.dropout = nn.Dropout(dropout)
