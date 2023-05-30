@@ -1,5 +1,5 @@
-from multi_head_attention import MultiHeadAttentionLayer
-from position import PositionwiseFeedforwardLayer
+from .multi_head_attention import MultiHeadAttentionLayer
+from .position import PositionwiseFeedforwardLayer
 import torch.nn as nn
 import torch
 
