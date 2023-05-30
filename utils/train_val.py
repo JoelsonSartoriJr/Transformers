@@ -4,7 +4,7 @@ from evaluate_one_epoch import evaluate_one_epoch
 import torch.nn as nn
 from torch import optim
 from torch.utils.data import DataLoader
-from epoch_time import epoch_time
+from utils import epoch_time
 import torch
 import math
 
