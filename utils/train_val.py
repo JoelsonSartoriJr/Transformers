@@ -1,24 +1,24 @@
 from time import time
-from train_one_epoch import train_one_epoch
-from evaluate_one_epoch import evaluate_one_epoch
+from .train_one_epoch import train_one_epoch
+from .evaluate_one_epoch import evaluate_one_epoch
 import torch.nn as nn
 from torch import optim
 from torch.utils.data import DataLoader
-from utils import epoch_time
+from .utils import epoch_time
 import torch
 import math
 
-def train_val(epochs:int, train_loader:DataLoader, val_loader:DataLoader, model:nn.Model, optimizer:optim, criterion:nn, clip:int)->list:
+def train_val(epochs:int, train_loader:DataLoader, val_loader:DataLoader, model, optimizer:optim, criterion, clip:int, device: torch.device)->list:
     best_valid_loss = float('inf')
 
     for epoch in range(epochs):
 
-        start_time = time.time()
+        start_time = time()
 
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, clip)
-        valid_loss = evaluate_one_epoch(model, val_loader, criterion)
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, clip, device)
+        valid_loss = evaluate_one_epoch(model, val_loader, criterion, device)
 
-        end_time = time.time()
+        end_time = time()
 
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 

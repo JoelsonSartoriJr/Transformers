@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch import optim
 
-def train_one_epoch(model:nn.Model, train_loader:DataLoader, optimizer:optim, criterion:nn, clip:int, device: torch.device)->float:
+def train_one_epoch(model, train_loader:DataLoader, optimizer:optim, criterion:nn, clip:int, device: torch.device)->float:
 
     model.train()
     

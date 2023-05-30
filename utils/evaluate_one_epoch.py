@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-def evaluate_one_epoch(model:torch.device, val_loader:DataLoader, criterion:nn, device: torch.device)->float:
+def evaluate_one_epoch(model, val_loader:DataLoader, criterion:nn, device:torch.device)->float:
 
     model.eval()
 
