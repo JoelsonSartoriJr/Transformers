@@ -1,41 +1,48 @@
-import torch
 import torch.nn as nn
-from decoder_block import DecoderBlock
-
+import torch
+from decoder_layer import DecoderLayer
 class Decoder(nn.Module):
-    def __init__(
-            self,
-            trg_vocab_size: int,
-            embed_size:int,
-            num_layers:int,
-            heads:int,
-            forward_expansion:int,
-            dropout:float,
-            device:torch.device,
-            max_length:int
-        ) -> None:
-        super(Decoder, self).__init__()
+    def __init__(self, 
+                output_dim:int, 
+                hid_dim:int, 
+                n_layers:int, 
+                n_heads:int, 
+                pf_dim:int, 
+                dropout:float, 
+                device:torch.device,
+                max_length:int = 100)->None:
+        super().__init__()
+        
         self.device = device
-        self.word_embedding = nn.Embedding(trg_vocab_size, embed_size)
-        self.position_embedding = nn.Embedding(max_length, embed_size)
         
-        self.layers = nn.ModuleList(
-            [
-                DecoderBlock(embed_size, heads, forward_expansion, dropout, device)
-                for _ in range(num_layers)
-            ]
-        )
+        self.tok_embedding = nn.Embedding(output_dim, hid_dim)
+        self.pos_embedding = nn.Embedding(max_length, hid_dim)
         
-        self.fc_out = nn.Linear(embed_size, trg_vocab_size)
+        self.layers = nn.ModuleList([DecoderLayer(hid_dim, 
+                                                    n_heads, 
+                                                    pf_dim, 
+                                                    dropout, 
+                                                    device)
+                                    for _ in range(n_layers)])
+        
+        self.fc_out = nn.Linear(hid_dim, output_dim)
+        
         self.dropout = nn.Dropout(dropout)
         
-    def forward(self, x:list, encode_out:list, src_mask:int, trg_mask:int)->list:
-        N, seq_length = x.shape
-        pos = torch.arange(0, seq_length).expand(N, seq_length).to(self.device)
-        x = self.dropout((self.word_embedding(x) + self.position_embedding(pos)))
+        self.scale = torch.sqrt(torch.FloatTensor([hid_dim])).to(device)
         
+    def forward(self, trg:list, enc_src:list, trg_mask:list, src_mask:list)->list:
+
+        batch_size = trg.shape[0]
+        trg_len = trg.shape[1]
+        
+        pos = torch.arange(0, trg_len).unsqueeze(0).repeat(batch_size, 1).to(self.device)
+
+        trg = self.dropout((self.tok_embedding(trg) * self.scale) + self.pos_embedding(pos))
+
         for layer in self.layers:
-            x = layer(x, encode_out, encode_out, src_mask, trg_mask)
-        
-        out = self.fc_out(x)
-        return out
+            trg, attention = layer(trg, enc_src, trg_mask, src_mask)
+
+        output = self.fc_out(trg)
+
+        return output, attention
