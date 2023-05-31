@@ -6,10 +6,10 @@ from torch.utils.data.sampler import Sampler
 from torch.nn.utils.rnn import pad_sequence
 import torch
 
-def load_data(path_file:str, init_token:str="<bos>", end_token:str="<eos>")->list:
+def load_data(path_file:str)->list:
     with open(path_file, encoding='utf-8') as f:
         data = f.read()
-        data = re.sub("\tCC-BY 2\.0.*","",data) 
+        data = re.sub("[^a-zA-Z0-9áàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]","",data) 
         data = re.sub(r"[\u202f]|[\xa0]"," ",data) 
         data = re.sub("([,\.:;!?\"])"," \\1",data) 
         data = re.sub("([¡¿\"])","\\1 ",data).lower()
@@ -21,11 +21,10 @@ def load_data(path_file:str, init_token:str="<bos>", end_token:str="<eos>")->lis
     for line in data:
         parts = line.split("\t")
         if len(parts) == 4:
-            src = parts[1].split(" ")
-            src = [init_token] + src + [end_token]
-            tgt = parts[3].split(" ")
-            tgt = [init_token] + tgt + [end_token]
-            data_list.append((src, len(src), tgt))
+            new_src = [t for t in f'{parts[1]} <eos>'.split(' ') if t]
+            new_tgt = [t for t in f'<bos> {parts[3]} <eos>'.split(' ') if t]
+            length_src = len(new_src)
+            data_list.append((new_src, length_src, new_tgt))
     
     return data_list
 

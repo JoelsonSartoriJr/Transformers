@@ -28,12 +28,10 @@ def collate_batch(batch:list)->tuple:
 
 ## Constants
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-INIT_TOKEN = "<bos>"
-END_TOKEN = "<eos>"
 PATH_DATA = 'data/portugues_spanish.tsv'
 batch_size = 64 
 
-data = load_data(PATH_DATA, INIT_TOKEN, END_TOKEN)
+data = load_data(PATH_DATA)
 train_list, val_list, test_list = split_data(data)
 vocab_src, vocab_tgt = create_vocab(train_list)
 
