@@ -9,7 +9,7 @@ def train_one_epoch(model, train_loader:DataLoader, optimizer:optim, criterion:n
     
     epoch_loss = 0
     
-    for i, batch in enumerate(train_loader):
+    for batch in train_loader:
         src, trg = batch
         src, trg = src.permute(1,0).to(device), trg.permute(1,0).to(device)
 

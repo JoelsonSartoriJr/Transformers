@@ -7,22 +7,25 @@ from torch.nn.utils.rnn import pad_sequence
 import torch
 
 def load_data(path_file:str)->list:
+    data = None
     with open(path_file, encoding='utf-8') as f:
         data = f.read()
-        data = re.sub("[^a-zA-Z0-9áàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s]","",data) 
-        data = re.sub(r"[\u202f]|[\xa0]"," ",data) 
-        data = re.sub("([,\.:;!?\"])"," \\1",data) 
+        data = re.sub("\tCC-BY 2\.0.*","",data) # acá elimino información adicional
+        data = re.sub(r"[\u202f]|[\xa0]"," ",data) # aca saco caracteres raros
+        data = re.sub("([,\.:;!?\"])"," \\1",data) # aca  y abajo tokenizo puntuación
         data = re.sub("([¡¿\"])","\\1 ",data).lower()
-
-    data = data.split("\n")
-    random.shuffle(data)
     
+    SRC_IDX, TGT_IDX = 0, 1
+    data2 = data.split('\n')
+
+    random.shuffle(data2)
     data_list = []
-    for line in data:
-        parts = line.split("\t")
-        if len(parts) == 4:
-            new_src = [t for t in f'{parts[1]} <eos>'.split(' ') if t]
-            new_tgt = [t for t in f'<bos> {parts[3]} <eos>'.split(' ') if t]
+    for i, line in enumerate(data2):
+        parts = line.split('\t')
+        if len(parts) == 2:
+            # Skip empty tokens
+            new_src = [t for t in f'{parts[SRC_IDX]} <eos>'.split(' ') if t]
+            new_tgt = [t for t in f'<bos> {parts[TGT_IDX]} <eos>'.split(' ') if t]
             length_src = len(new_src)
             data_list.append((new_src, length_src, new_tgt))
     

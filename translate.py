@@ -28,7 +28,7 @@ def collate_batch(batch:list)->tuple:
 
 ## Constants
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-PATH_DATA = 'data/portugues_spanish.tsv'
+PATH_DATA = 'data/por.txt'
 batch_size = 64 
 
 data = load_data(PATH_DATA)

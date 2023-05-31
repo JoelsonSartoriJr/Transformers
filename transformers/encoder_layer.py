@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch
 
 class EncoderBlock(nn.Module):
-    def __init__(self,hid_dim:int, n_heads:int, pf_dim:int, dropout:float, device: torch.device) -> None:
+    def __init__(self,hid_dim:int, n_heads:int, pf_dim:int, dropout:float, device:torch.device) -> None:
         super().__init__()
         
         self.self_attn_layer_norm = nn.LayerNorm(hid_dim)
