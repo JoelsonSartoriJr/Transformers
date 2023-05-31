@@ -1,9 +1,8 @@
 import sys
-sys.path.append('../')
 import torch
 import torch.nn as nn
-from transformers.encoder import Encoder
-from transformers.decoder import Decoder
+from ..transformers.encoder import Encoder
+from ..transformers.decoder import Decoder
 class Seq2Seq(nn.Module):
     def __init__(self, 
                     encoder:Encoder, 
