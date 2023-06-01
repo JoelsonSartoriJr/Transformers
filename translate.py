@@ -6,6 +6,9 @@ from torch.nn import CrossEntropyLoss
 from utils.train_val import train_val
 from utils.utils import set_seed, count_parameters, initialize_weights
 from utils.data import load_data, split_data, create_vocab, BucketSampler, collate_batch
+from utils.graphs import *
+from utils.translate import translate_sentence
+from torchtext.data.metrics import bleu_score
 from transformers import Encoder
 from transformers import Decoder
 from seq2seq import Seq2Seq
@@ -25,6 +28,23 @@ def collate_batch(batch:list)->tuple:
     result = (pad_sequence(text_src, padding_value=SRC_PAD_IDX),
                 pad_sequence(text_tgt, padding_value=TGT_PAD_IDX))
     return result
+
+def calculate_bleu(data:list, src_vocab:list, trg_vocab:list, model, device:torch.device , max_len:int = 50)->float:
+    
+    trgs = []
+    pred_trgs = []
+    
+    for datum in list(data):
+        src, length, trg = datum        
+        pred_trg, _ = translate_sentence(src, src_vocab, trg_vocab, model, device, max_len)
+        
+        #cut off <eos> token
+        pred_trg = pred_trg[:-1]
+        trg = trg[1:-1]
+        pred_trgs.append(pred_trg)
+        trgs.append([trg])
+        
+    return bleu_score(pred_trgs, trgs)
 
 ## Constants
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -97,4 +117,22 @@ model.apply(initialize_weights)
 optimizer = Adam(model.parameters(), lr = LEARNING_RATE)
 criterion = CrossEntropyLoss(ignore_index = TGT_PAD_IDX)
 
-train_val(N_EPOCHS, train_iter, val_iter, model, optimizer, criterion, CLIP, DEVICE)
+best, result = train_val(N_EPOCHS, train_iter, val_iter, model, optimizer, criterion, CLIP, DEVICE)
+
+error_plot(result)
+
+example_idx = 20
+
+src, length, trg  = train_list[example_idx]
+print(f'src = {src}')
+print(f'trg = {trg}')
+
+translation, attention = translate_sentence(src, vocab_src, vocab_tgt, model, DEVICE)
+
+print(f'predicted trg = {translation}')
+
+display_attention(src, translation, attention)
+
+bleu_score = calculate_bleu(test_list, vocab_src, vocab_tgt, model, DEVICE)
+
+print(f'BLEU score = {bleu_score*100:.2f}')
